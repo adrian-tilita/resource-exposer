@@ -1,5 +1,7 @@
 <?php
-<?php
+use Illuminate\Support\Facades\Cache;
+use AdrianTilita\ResourceExposer\Console\GenerateCommand;
+use Symfony\Component\HttpFoundation\JsonResponse;
 /*
 |--------------------------------------------------------------------------
 | Module Routes
@@ -10,6 +12,15 @@
 | and give it the Closure to execute when that URI is requested.
 |
 */
-Route::get('resource-api', function() {
-    return 'Ok!';
+Route::get('resource-api/list-resources', function() {
+    $resources = Cache::get(GenerateCommand::STORE_KEY);
+    return new JsonResponse(array_keys($resources));
+});
+
+Route::get('resource-api/get-resource/{resourceName}/{id}', function($resourceName, $id) {
+    $resources = Cache::get(GenerateCommand::STORE_KEY);
+    /** @var \Illuminate\Database\Eloquent\Model $class */
+    $class = "\\" . $resources[$resourceName];
+    $resources = ($class::all())->toArray();
+    return new JsonResponse($resources);
 });
