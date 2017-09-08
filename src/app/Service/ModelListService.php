@@ -47,9 +47,12 @@ class ModelListService
         return $list;
     }
 
+    /**
+     * @todo    Implement
+     * @param string $modelAliasName
+     */
     public function getModel(string $modelAliasName)#: Model
     {
-
     }
 
     /**

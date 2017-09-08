@@ -8,12 +8,12 @@ use AdrianTilita\ResourceExposer\Service\RequestHandler;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * Class ApplicationServiceProvider
+ * @package AdrianTilita\ResourceExposer\Provider
+ */
 class ApplicationServiceProvider extends ServiceProvider
 {
-    public function register()
-    {
-    }
-
     /**
      * Register routes, translations, views and publishers.
      *
@@ -28,8 +28,9 @@ class ApplicationServiceProvider extends ServiceProvider
         $this->commands([
             GenerateCommand::class
         ]);
+
         // model list service
-        $this->app->bind('AdrianTilita\ResourceExposer\Service\ModelListService', function ($app) {
+        $this->app->bind('AdrianTilita\ResourceExposer\Service\ModelListService', function () {
             return new ModelListService(
                 new ClassSearchService(app_path(), Model::class)
             );

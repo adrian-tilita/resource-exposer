@@ -101,5 +101,4 @@ class RequestHandler
             !isset($statusCode) ? Response::HTTP_OK : $statusCode
         ];
     }
-
 }

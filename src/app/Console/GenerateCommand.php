@@ -7,6 +7,10 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+/**
+ * Class GenerateCommand
+ * @package AdrianTilita\ResourceExposer\Console
+ */
 class GenerateCommand extends Command
 {
     /**
@@ -74,5 +78,4 @@ class GenerateCommand extends Command
         }
         return $this->modelListService;
     }
-
 }
