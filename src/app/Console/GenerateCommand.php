@@ -2,20 +2,19 @@
 namespace AdrianTilita\ResourceExposer\Console;
 
 use AdrianTilita\ResourceExposer\Service\ClassSearchService;
+use AdrianTilita\ResourceExposer\Service\ModelListService;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Cache;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 class GenerateCommand extends Command
 {
-    const STORE_KEY = 'resource_exposer';
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'resource-exposer:search-models';
+    protected $name = 'exposer:setup';
 
     /**
      * The console command description.
@@ -25,9 +24,9 @@ class GenerateCommand extends Command
     protected $description = 'Search the entire project for defined models and cache the results';
 
     /**
-     * @var null
+     * @var null|ModelListService
      */
-    private $modelSearchService = null;
+    private $modelListService = null;
     /**
      * Execute the console command.
      *
@@ -44,15 +43,14 @@ class GenerateCommand extends Command
             )
         );
 
-        $definedModels = $this->getFileSearchService()->findClasses();
-
-        Cache::forever(static::STORE_KEY, $this->formatClassReferences($definedModels));
+        $this->getModelListService()->search();
+        $modelList = $this->getModelListService()->fetchAll();
 
         $io->success(
             sprintf(
                 "Finished parsing for models in project!\nFound %d models in your project.\n\n%s",
-                count($definedModels),
-                implode(", ", $definedModels)
+                count($modelList),
+                implode(", ", $modelList)
             ),
             "info"
         );
@@ -61,50 +59,20 @@ class GenerateCommand extends Command
     }
 
     /**
-     * @return ClassSearchService
+     * @return ModelListService
      */
-    private function getFileSearchService(): ClassSearchService
+    private function getModelListService(): ModelListService
     {
-        if (is_null($this->modelSearchService)) {
-            $this->modelSearchService = new ClassSearchService(
-                app_path(),
-                Model::class,
-                '.php'
+        if (is_null($this->modelListService)) {
+            $this->modelListService = new ModelListService(
+                new ClassSearchService(
+                    app_path(),
+                    Model::class,
+                    '.php'
+                )
             );
         }
-        return $this->modelSearchService;
+        return $this->modelListService;
     }
 
-    /**
-     * Format stored models in [resource_name => resource_class] format
-     * @param array $definedModels
-     * @return array
-     */
-    private function formatClassReferences(array $definedModels): array
-    {
-        foreach ($definedModels as $key => $modelName) {
-            $split = explode("\\", $modelName);
-            $resourceName = strtolower(end($split));
-            if (isset($definedModels[$resourceName])) {
-                $resourceName = $resourceName . '_' . $this->generateRandomString();
-            }
-            $definedModels[$resourceName] = $modelName;
-            unset($definedModels[$key]);
-        }
-        return $definedModels;
-    }
-
-    /**
-     * @return string
-     */
-    private function generateRandomString(): string
-    {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyz';
-        $charactersLength = strlen($characters);
-        $randomString = '';
-        for ($i = 0; $i < 10; $i++) {
-            $randomString .= $characters[rand(0, $charactersLength - 1)];
-        }
-        return $randomString;
-    }
 }
