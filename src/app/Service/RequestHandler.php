@@ -4,12 +4,19 @@ namespace AdrianTilita\ResourceExposer\Service;
 use AdrianTilita\ResourceExposer\Adapter\ListResponseAdapter;
 use AdrianTilita\ResourceExposer\Console\GenerateCommand;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Config;
 
 class RequestHandler
 {
+    /**
+     * @const string
+     */
+    const EXPOSE_CONFIG_KEY = 'expose';
     const FILTER_TYPE_DATE = 'newest_than';
+
     /**
      * @var null|GenerateCommand
      */
@@ -64,7 +71,6 @@ class RequestHandler
                 $statusCode = Response::HTTP_BAD_REQUEST;
             }
 
-
             /** @var Model $model */
             $model = $resources[$resourceName];
             switch ($filterKey) {
@@ -84,6 +90,8 @@ class RequestHandler
                 ->skip(($page_nr * $per_page) - $per_page)
                 ->get();
 
+            $content = $this->adaptContent($content);
+
             $response = [
                 'content' => $content,
                 'total' => $totalItems,
@@ -100,5 +108,19 @@ class RequestHandler
             $response,
             !isset($statusCode) ? Response::HTTP_OK : $statusCode
         ];
+    }
+
+    private function adaptContent(Collection $content): array
+    {
+        if (false === Config::has(static::EXPOSE_CONFIG_KEY)) {
+            return $content;
+        }
+
+
+
+        $transformers = Config::get('expose');
+        var_dump($transformers);
+        die();
+
     }
 }

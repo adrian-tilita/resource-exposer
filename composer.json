@@ -11,7 +11,8 @@
     }
   ],
   "require": {
-    "php": ">7.0"
+    "php": ">7.0",
+    "laravel/framework": "5.4.*"
   },
   "require-dev": {
     "phpunit/phpunit": "^4.8",
@@ -20,6 +21,23 @@
   },
   "autoload": {
     "psr-4": {"AdrianTilita\\ResourceExposer\\": "src/"}
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "AdrianTilita\\ResourceExposer\\Provider\\ApplicationServiceProvider"
+      ]
+    }
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "[ -f $(readlink -f /config/exposure.php) ] || touch config/exposure.php && echo \"<?php\\nreturn [\\n];\" > config/exposure.php",
+      "php artisan exposure:setup"
+    ],
+    "post-update-cmd": [
+      "[ -f $(readlink -f /config/exposure.php) ] || touch config/exposure.php && echo \"<?php\\nreturn [\\n];\" > config/exposure.php",
+      "php artisan exposure:setup"
+    ]
   },
   "minimum-stability": "stable"
 }

@@ -1,6 +1,7 @@
 <?php
 namespace AdrianTilita\ResourceExposer\Console;
 
+use AdrianTilita\ResourceExposer\Log\CliLog;
 use AdrianTilita\ResourceExposer\Service\ClassSearchService;
 use AdrianTilita\ResourceExposer\Service\ModelListService;
 use Illuminate\Console\Command;
@@ -31,6 +32,12 @@ class GenerateCommand extends Command
      * @var null|ModelListService
      */
     private $modelListService = null;
+
+    /**
+     * @var null|ClassSearchService
+     */
+    private $classSearchService = null;
+
     /**
      * Execute the console command.
      *
@@ -46,6 +53,11 @@ class GenerateCommand extends Command
                 realpath(app_path())
             )
         );
+
+        // enable debug mode
+        if ($this->output->isVerbose() || $this->output->isDebug()) {
+            $this->getClassSearchService()->setLogger(new CliLog($this->output));
+        }
 
         $this->getModelListService()->search();
         $modelList = $this->getModelListService()->fetchAll();
@@ -63,17 +75,27 @@ class GenerateCommand extends Command
     }
 
     /**
+     * @return ClassSearchService
+     */
+    private function getClassSearchService(): ClassSearchService
+    {
+        if (is_null($this->classSearchService)) {
+            $this->classSearchService = new ClassSearchService(
+                app_path(),
+                Model::class,
+                '.php'
+            );
+        }
+        return $this->classSearchService;
+    }
+    /**
      * @return ModelListService
      */
     private function getModelListService(): ModelListService
     {
         if (is_null($this->modelListService)) {
             $this->modelListService = new ModelListService(
-                new ClassSearchService(
-                    app_path(),
-                    Model::class,
-                    '.php'
-                )
+                $this->getClassSearchService()
             );
         }
         return $this->modelListService;

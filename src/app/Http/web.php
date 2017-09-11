@@ -76,7 +76,7 @@ Route::get('exposure/list', function(RequestHandler $requestHandler) {
 });
 
 Route::get(
-    'exposure/resources/filter/{resourceName}/filter/{filterKey}/{filterValue}{extraFields?}',
+    'exposure/resources/filter/{resourceName}/{filterKey}/{filterValue}{extraFields?}',
     function(RequestHandler $requestHandler, $resourceName, $filterKey, $filterValue, $extraFields = '') {
         $page_nr  = 1;
         $per_page = 100;

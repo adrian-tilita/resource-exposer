@@ -1,12 +1,18 @@
 <?php
 namespace AdrianTilita\ResourceExposer\Service;
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 
 /**
  * Class ClassSearchService
  * @package AdrianTilita\ResourceExposer\Service
  */
-class ClassSearchService
+class ClassSearchService implements LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     /**
      * @var null|string Fully qualified path
      */
@@ -49,6 +55,20 @@ class ClassSearchService
     }
 
     /**
+     * Log Messages
+     * @param string $message
+     */
+    private function log(string $message)
+    {
+        if (!is_null($this->logger)) {
+            $this->logger->log(
+                LogLevel::DEBUG,
+                sprintf("[%s] - %s", date('Y-m-d H:i:s'), $message)
+            );
+        }
+    }
+
+    /**
      * Scan a directory and list all files that correspond to given criteria
      * @param string $directory
      * @return array
@@ -56,21 +76,24 @@ class ClassSearchService
     private function getFiles(string $directory): array
     {
         $fileList = [];
-
         $files = scandir($directory);
+        $this->log(sprintf("Scanning dir %s, found %d files", $directory, count($files)));
         foreach ($files as $index => $file) {
-            // not the file we want
-            if (false === $this->isRequiredFile($file)) {
-                continue;
-            }
             // recursive retrieve files in subdirectories
-            if (true === is_dir($directory . DIRECTORY_SEPARATOR . $file)) {
+            if (true === is_dir($directory . DIRECTORY_SEPARATOR . $file) && !in_array($file, [".", ".."])) {
                 $fileList = array_merge(
                     $fileList,
                     $this->getFiles($directory . DIRECTORY_SEPARATOR . $file)
                 );
                 continue;
             }
+
+            // not the file we want
+            if (false === $this->isRequiredFile($file)) {
+                $this->log(sprintf("Files %s is not required", $directory . DIRECTORY_SEPARATOR . $file));
+                continue;
+            }
+            $this->log(sprintf("Collected %s", $directory . DIRECTORY_SEPARATOR . $file));
             $fileList[] = $directory . DIRECTORY_SEPARATOR . $file;
         }
         return $fileList;
@@ -82,8 +105,7 @@ class ClassSearchService
      */
     private function isRequiredFile(string $file): bool
     {
-        return substr($file, strlen($this->extension) * -1) === $this->extension &&
-            !in_array($file, [".", ".."]);
+        return substr($file, strlen($this->extension) * -1) === $this->extension;
     }
 
     /**
@@ -125,6 +147,7 @@ class ClassSearchService
             class_parents($className),
             class_implements($className)
         );
+        $this->log(sprintf("Class %s is a %s", $className, implode(', ', $types)));
         return in_array($classType, $types);
     }
 }
