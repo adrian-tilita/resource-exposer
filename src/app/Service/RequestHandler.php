@@ -91,7 +91,7 @@ class RequestHandler
                 ->skip(($page_nr * $per_page) - $per_page)
                 ->get();
 
-            $content = $this->adaptContent($content);
+            $content = $this->adaptContent($content, $resources[$resourceName]);
 
             $response = [
                 'content' => $content,
@@ -111,11 +111,29 @@ class RequestHandler
         ];
     }
 
-    private function adaptContent(Collection $content): Collection
+    /**
+     * @param Collection $content
+     * @param string $modelName
+     * @return array
+     */
+    private function adaptContent(Collection $content, string $modelName): array
     {
-        if (false === Config::has(static::EXPOSE_CONFIG_KEY)) {
-            return $content;
+        $keyExists = Config::has(static::EXPOSE_CONFIG_KEY);
+        $transformIsDefined = $keyExists && key_exists($modelName, Config::get(static::EXPOSE_CONFIG_KEY));
+
+        if (!$keyExists || !$transformIsDefined) {
+            return $content->toArray();
         }
-        return $content;
+
+        $transformerList = Config::get(static::EXPOSE_CONFIG_KEY);
+        $transformer = $transformerList[$modelName];
+
+        $transformerClass = new $transformer;
+
+        $modelData = $content->all();
+        foreach ($modelData as $key => $model) {
+            $modelData[$key] = $transformerClass->transform($model);
+        }
+        return $modelData;
     }
 }
