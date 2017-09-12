@@ -2,6 +2,7 @@
 namespace AdrianTilita\ResourceExposer\Service;
 
 use AdrianTilita\ResourceExposer\Base\CacheInterface;
+use AdrianTilita\ResourceExposer\Bridge\CacheBridge;
 use NeedleProject\Common\ClassFinder;
 
 class ModelListService
@@ -17,13 +18,21 @@ class ModelListService
     private $classFinder = null;
 
     /**
+     * @var CacheInterface|CacheBridge|null
+     */
+    private $cacheManager = null;
+
+    /**
      * ModelListService constructor.
      * @param ClassFinder $classFinder
      * @param CacheInterface $cache
      */
-    public function __construct(ClassFinder $classFinder, CacheInterface $cache)
+    public function __construct(ClassFinder $classFinder, CacheInterface $cache = null)
     {
         $this->classFinder = $classFinder;
+        if (is_null($cache)) {
+            $cache = new CacheBridge();
+        }
         $this->cacheManager = $cache;
     }
 
