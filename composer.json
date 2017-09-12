@@ -25,10 +25,10 @@
   },
   "scripts": {
     "post-install-cmd": [
-      "php artisan exposure:setup"
+      "php artisan exposure:search-models"
     ],
     "post-update-cmd": [
-      "php artisan exposure:setup"
+      "php artisan exposure:search-models"
     ]
   },
   "minimum-stability": "stable"

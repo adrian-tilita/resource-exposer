@@ -1,7 +1,6 @@
 <?php
 namespace AdrianTilita\ResourceExposer\Service;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use NeedleProject\Common\ClassFinder;
 
@@ -46,14 +45,6 @@ class ModelListService
             $list = Cache::get(static::STORE_KEY);
         }
         return $list;
-    }
-
-    /**
-     * @todo    Implement
-     * @param string $modelAliasName
-     */
-    public function getModel(string $modelAliasName)#: Model
-    {
     }
 
     /**
