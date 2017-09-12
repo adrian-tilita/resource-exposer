@@ -1,6 +1,7 @@
 <?php
 namespace AdrianTilita\ResourceExposer\Console;
 
+use AdrianTilita\ResourceExposer\Bridge\CacheBridge;
 use AdrianTilita\ResourceExposer\Log\CliLog;
 use AdrianTilita\ResourceExposer\Service\ModelListService;
 use NeedleProject\Common\ClassFinder;
@@ -45,6 +46,7 @@ class SearchModelsCommand extends Command
      */
     public function handle()
     {
+
         $io = new SymfonyStyle($this->input, $this->output);
         $io->note(
             sprintf(
@@ -70,7 +72,8 @@ class SearchModelsCommand extends Command
             ),
             "info"
         );
-
+        var_dump('a');
+        die();
         return null;
     }
 
@@ -94,7 +97,8 @@ class SearchModelsCommand extends Command
     {
         if (is_null($this->modelListService)) {
             $this->modelListService = new ModelListService(
-                $this->getClassFinder()
+                $this->getClassFinder(),
+                new CacheBridge()
             );
         }
         return $this->modelListService;

@@ -1,7 +1,7 @@
 <?php
 namespace AdrianTilita\ResourceExposer\Service;
 
-use Illuminate\Support\Facades\Cache;
+use AdrianTilita\ResourceExposer\Base\CacheInterface;
 use NeedleProject\Common\ClassFinder;
 
 class ModelListService
@@ -19,10 +19,12 @@ class ModelListService
     /**
      * ModelListService constructor.
      * @param ClassFinder $classFinder
+     * @param CacheInterface $cache
      */
-    public function __construct(ClassFinder $classFinder)
+    public function __construct(ClassFinder $classFinder, CacheInterface $cache)
     {
         $this->classFinder = $classFinder;
+        $this->cacheManager = $cache;
     }
 
     /**
@@ -31,7 +33,10 @@ class ModelListService
     public function search()
     {
         $definedModels = $this->classFinder->findClasses();
-        Cache::forever(static::STORE_KEY, $this->formatClassReferences($definedModels));
+        $this->cacheManager->store(
+            static::STORE_KEY,
+            $this->formatClassReferences($definedModels)
+        );
     }
 
     /**
@@ -39,12 +44,10 @@ class ModelListService
      */
     public function fetchAll(): array
     {
-        $list = Cache::get(static::STORE_KEY);
-        if (is_null($list)) {
+        if (false === $this->cacheManager->has(static::STORE_KEY)) {
             $this->search();
-            $list = Cache::get(static::STORE_KEY);
         }
-        return $list;
+        return $this->cacheManager->get(static::STORE_KEY);
     }
 
     /**
