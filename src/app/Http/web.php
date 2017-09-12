@@ -20,12 +20,12 @@ Route::options('exposure/info', function() {
                 'description' => 'List available exposed resources',
             ],
             'resources' => [
-                'url' => '/exposure/resources/filter/[string:resourceName]/[filters]',
+                'url' => '/exposure/filter/[string:resourceName]/[filters]',
                 'description' => 'Exposed content for each resource',
                 'parameters' => [
                     'resourceName' => [
                         'type' => 'string',
-                        'example' => '/exposure/resources/filter/users/[filters]'
+                        'example' => '/exposure/filter/users/[filters]'
                     ],
                     'filter' => [
                         'type' => 'query-string',
@@ -34,10 +34,10 @@ Route::options('exposure/info', function() {
                             'newer_than' => 'UTC timestamp'
                         ],
                         'example' => [
-                            "/exposure/resources/filter/users/id/1/page/2/per_page/1newer_than/",
-                            "/exposure/resources/filter/users/newer_than/" .
+                            "/exposure/filter/users/id/1/page/2/per_page/1newer_than/",
+                            "/exposure/filter/users/newer_than/" .
                                 (new DateTime('now', new DateTimeZone('UTC')))->format('U') .
-                                "/page/2/per_page/1newer_than/"
+                                "/page/2/per_page/1"
                         ],
                         "optional" => [
                             "page" => "default 1",
@@ -76,20 +76,19 @@ Route::get('exposure/list', function(RequestHandler $requestHandler) {
 });
 
 Route::get(
-    'exposure/resources/filter/{resourceName}/{filterKey}/{filterValue}{extraFields?}',
+    'exposure/filter/{resourceName}/{filterKey}/{filterValue}{extraFields?}',
     function(RequestHandler $requestHandler, $resourceName, $filterKey, $filterValue, $extraFields = '') {
         $page_nr  = 1;
         $per_page = 100;
 
         if (!empty($extraFields)) {
-            if (preg_match('/per_page\/([0-9]+)/msu', $extraFields, $result)) {
-                $per_page = isset($result[1]) ? $result[1] : $per_page;
+            if (preg_match('/per_page\/([0-9]+)/msu', $extraFields, $per_page_result)) {
+                $per_page = isset($per_page_result[1]) ? $per_page_result[1] : $per_page;
             }
-            if (preg_match('/page\/([0-9]+)/msu', $extraFields, $result)) {
-                $page_nr = isset($result[1]) ? $result[1] : $page_nr;
+            if (preg_match('/\/page\/([0-9]+)/msu', $extraFields, $page_nr_result)) {
+                $page_nr = isset($page_nr_result[1]) ? $page_nr_result[1] : $page_nr;
             }
         }
-
         list($response, $statusCode) = $requestHandler->handleFilter(
             $resourceName,
             $filterKey,

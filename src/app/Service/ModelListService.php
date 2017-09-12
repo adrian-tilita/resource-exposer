@@ -49,14 +49,6 @@ class ModelListService
     }
 
     /**
-     * @todo    Implement
-     * @param string $modelAliasName
-     */
-    public function getModel(string $modelAliasName)#: Model
-    {
-    }
-
-    /**
      * Format stored models in [resource_name => resource_class] format
      * @param array $definedModels
      * @return array

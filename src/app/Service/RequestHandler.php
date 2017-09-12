@@ -14,7 +14,7 @@ class RequestHandler
      * @const string
      */
     const EXPOSE_CONFIG_KEY = 'expose';
-    const FILTER_TYPE_DATE = 'newest_than';
+    const FILTER_TYPE_DATE = 'newer_than';
 
     /**
      * @var null|GenerateCommand
@@ -36,7 +36,9 @@ class RequestHandler
     public function handleList()
     {
         try {
-            $response = $this->modelListService->fetchAll();
+            $response = array_keys(
+                $this->modelListService->fetchAll()
+            );
         } catch (\Throwable $e) {
             $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR;
             $response = ['error' => $e->getMessage()];
@@ -64,8 +66,10 @@ class RequestHandler
             $resources = $this->modelListService->fetchAll();
             // invalid resource name
             if (!isset($resources[$resourceName])) {
-                $response = ['error' => sprintf('Resource %s does not exists!', $resourceName)];
-                $statusCode = Response::HTTP_BAD_REQUEST;
+                return [
+                    ['error' => sprintf('Resource %s does not exists!', $resourceName)],
+                    Response::HTTP_BAD_REQUEST
+                ];
             }
 
             /** @var Model $model */
@@ -107,17 +111,11 @@ class RequestHandler
         ];
     }
 
-    private function adaptContent(Collection $content): array
+    private function adaptContent(Collection $content): Collection
     {
         if (false === Config::has(static::EXPOSE_CONFIG_KEY)) {
             return $content;
         }
-
-
-
-        $transformers = Config::get('expose');
-        var_dump($transformers);
-        die();
-
+        return $content;
     }
 }

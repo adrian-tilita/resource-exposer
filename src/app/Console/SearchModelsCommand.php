@@ -12,14 +12,14 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * Class GenerateCommand
  * @package AdrianTilita\ResourceExposer\Console
  */
-class GenerateCommand extends Command
+class SearchModelsCommand extends Command
 {
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'exposer:setup';
+    protected $name = 'exposer:search-models';
 
     /**
      * The console command description.

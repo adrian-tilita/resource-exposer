@@ -1,7 +1,7 @@
 <?php
 namespace AdrianTilita\ResourceExposer\Provider;
 
-use AdrianTilita\ResourceExposer\Console\GenerateCommand;
+use AdrianTilita\ResourceExposer\Console\SearchModelsCommand;
 use AdrianTilita\ResourceExposer\Service\ModelListService;
 use AdrianTilita\ResourceExposer\Service\RequestHandler;
 use NeedleProject\Common\ClassFinder;
@@ -26,7 +26,7 @@ class ApplicationServiceProvider extends ServiceProvider
             require realpath(__DIR__.'/../Http/web.php');
         }
         $this->commands([
-            GenerateCommand::class
+            SearchModelsCommand::class
         ]);
 
         // model list service
