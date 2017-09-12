@@ -3,6 +3,7 @@ namespace AdrianTilita\ResourceExposer\Service;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use NeedleProject\Common\ClassFinder;
 
 class ModelListService
 {
@@ -12,17 +13,17 @@ class ModelListService
     const STORE_KEY = 'resource_exposer';
 
     /**
-     * @var ClassSearchService|null
+     * @var ClassFinder|null
      */
-    private $classSearchService = null;
+    private $classFinder = null;
 
     /**
      * ModelListService constructor.
-     * @param ClassSearchService $classSearchService
+     * @param ClassFinder $classFinder
      */
-    public function __construct(ClassSearchService $classSearchService)
+    public function __construct(ClassFinder $classFinder)
     {
-        $this->classSearchService = $classSearchService;
+        $this->classFinder = $classFinder;
     }
 
     /**
@@ -30,7 +31,7 @@ class ModelListService
      */
     public function search()
     {
-        $definedModels = $this->classSearchService->findClasses();
+        $definedModels = $this->classFinder->findClasses();
         Cache::forever(static::STORE_KEY, $this->formatClassReferences($definedModels));
     }
 

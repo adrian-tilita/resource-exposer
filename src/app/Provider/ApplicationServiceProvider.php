@@ -2,9 +2,9 @@
 namespace AdrianTilita\ResourceExposer\Provider;
 
 use AdrianTilita\ResourceExposer\Console\GenerateCommand;
-use AdrianTilita\ResourceExposer\Service\ClassSearchService;
 use AdrianTilita\ResourceExposer\Service\ModelListService;
 use AdrianTilita\ResourceExposer\Service\RequestHandler;
+use NeedleProject\Common\ClassFinder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
 
@@ -32,7 +32,7 @@ class ApplicationServiceProvider extends ServiceProvider
         // model list service
         $this->app->bind('AdrianTilita\ResourceExposer\Service\ModelListService', function () {
             return new ModelListService(
-                new ClassSearchService(app_path(), Model::class)
+                new ClassFinder(app_path(), Model::class)
             );
         });
         $this->app->make('AdrianTilita\ResourceExposer\Service\ModelListService');

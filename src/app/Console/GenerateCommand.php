@@ -2,8 +2,8 @@
 namespace AdrianTilita\ResourceExposer\Console;
 
 use AdrianTilita\ResourceExposer\Log\CliLog;
-use AdrianTilita\ResourceExposer\Service\ClassSearchService;
 use AdrianTilita\ResourceExposer\Service\ModelListService;
+use NeedleProject\Common\ClassFinder;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -56,7 +56,7 @@ class GenerateCommand extends Command
 
         // enable debug mode
         if ($this->output->isVerbose() || $this->output->isDebug()) {
-            $this->getClassSearchService()->setLogger(new CliLog($this->output));
+            $this->getClassFinder()->setLogger(new CliLog($this->output));
         }
 
         $this->getModelListService()->search();
@@ -75,15 +75,14 @@ class GenerateCommand extends Command
     }
 
     /**
-     * @return ClassSearchService
+     * @return ClassFinder
      */
-    private function getClassSearchService(): ClassSearchService
+    private function getClassFinder(): ClassFinder
     {
         if (is_null($this->classSearchService)) {
-            $this->classSearchService = new ClassSearchService(
+            $this->classSearchService = new ClassFinder(
                 app_path(),
-                Model::class,
-                '.php'
+                Model::class
             );
         }
         return $this->classSearchService;
@@ -95,7 +94,7 @@ class GenerateCommand extends Command
     {
         if (is_null($this->modelListService)) {
             $this->modelListService = new ModelListService(
-                $this->getClassSearchService()
+                $this->getClassFinder()
             );
         }
         return $this->modelListService;

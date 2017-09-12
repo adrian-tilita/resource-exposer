@@ -18,6 +18,26 @@ An automatic Laravel resource (model) API expose system.
     ]
 ```
 2. Run composer update/install in your project
+3. Register the provider in our ```config/app.php```
+```
+<?php
+
+return [
+    // [...]
+    'providers' => [
+
+        // [...]
+
+        /*
+         * Package Service Provider...
+         */
+        AdrianTilita\ResourceExposer\Provider\ApplicationServiceProvider::class,
+
+        // [...]
+    ]
+    // [...]
+];
+```
 3. For the first setup, run in CLI:
 ```
 php artisan expose:setup
@@ -26,6 +46,7 @@ php artisan expose:setup
 4. Access OPTION ```[base-url]exposure/info``` for information
 
 5. (Optional) - Register Transformers
+Create a new file in ```config``` directory named ```expose.php```
 Open ```config/expose.php``` and add:
 ```
 <?php

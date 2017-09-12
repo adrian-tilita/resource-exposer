@@ -23,13 +23,6 @@
   "autoload": {
     "psr-4": {"AdrianTilita\\ResourceExposer\\": "src/"}
   },
-  "extra": {
-    "laravel": {
-      "providers": [
-        "AdrianTilita\\ResourceExposer\\Provider\\ApplicationServiceProvider"
-      ]
-    }
-  },
   "scripts": {
     "post-install-cmd": [
       "php artisan exposure:setup"

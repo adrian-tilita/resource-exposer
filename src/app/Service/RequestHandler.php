@@ -1,7 +1,6 @@
 <?php
 namespace AdrianTilita\ResourceExposer\Service;
 
-use AdrianTilita\ResourceExposer\Adapter\ListResponseAdapter;
 use AdrianTilita\ResourceExposer\Console\GenerateCommand;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
@@ -37,9 +36,7 @@ class RequestHandler
     public function handleList()
     {
         try {
-            $response = ListResponseAdapter::adapt(
-                $this->modelListService->fetchAll()
-            );
+            $response = $this->modelListService->fetchAll();
         } catch (\Throwable $e) {
             $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR;
             $response = ['error' => $e->getMessage()];
