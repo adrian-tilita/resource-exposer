@@ -1,14 +1,10 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: adrian-tilita
- * Date: 9/12/17
- * Time: 3:10 PM
- */
-
 namespace AdrianTilita\ResourceExposer\Base;
 
-
+/**
+ * Interface CacheInterface
+ * @package AdrianTilita\ResourceExposer\Base
+ */
 interface CacheInterface
 {
     /**

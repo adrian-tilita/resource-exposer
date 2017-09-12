@@ -62,12 +62,17 @@ class RequestHandler
      * @param string $resourceName
      * @param string $filterKey
      * @param string $filterValue
-     * @param int $page_nr
-     * @param int $per_page
+     * @param int $pageNr
+     * @param int $perPage
      * @return array
      */
-    public function handleFilter(string $resourceName, string $filterKey, string $filterValue, int $page_nr, int $per_page)
-    {
+    public function handleFilter(
+        string $resourceName,
+        string $filterKey,
+        string $filterValue,
+        int $pageNr,
+        int $perPage
+    ) {
         try {
             $resources = $this->modelListService->fetchAll();
             // invalid resource name
@@ -82,19 +87,16 @@ class RequestHandler
             $model = $resources[$resourceName];
             switch ($filterKey) {
                 case static::FILTER_TYPE_DATE:
-                    $query = $model::where(
-                        'created_at', '>=', Carbon::createFromTimestamp($filterValue)
-                    )->orWhere(
-                        'updated_at', '>=', Carbon::createFromTimestamp($filterValue)
-                    );
+                    $query = $model::where('created_at', '>=', Carbon::createFromTimestamp($filterValue))
+                        ->orWhere('updated_at', '>=', Carbon::createFromTimestamp($filterValue));
                     break;
                 default:
                     $query = $model::where($filterKey, $filterValue);
             }
             $totalItems = $query->count();
 
-            $content = $query->limit($per_page)
-                ->skip(($page_nr * $per_page) - $per_page)
+            $content = $query->limit($perPage)
+                ->skip(($pageNr * $perPage) - $perPage)
                 ->get();
 
             $content = $this->adaptContent($content, $resources[$resourceName]);
@@ -102,9 +104,9 @@ class RequestHandler
             $response = [
                 'content' => $content,
                 'total' => $totalItems,
-                'current_page' => $page_nr,
-                'per_page' => $per_page,
-                'page_count' => ceil($totalItems / $per_page)
+                'current_page' => $pageNr,
+                'per_page' => $perPage,
+                'page_count' => ceil($totalItems / $perPage)
             ];
         } catch (\Throwable $e) {
             $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR;
@@ -127,6 +129,7 @@ class RequestHandler
         $keyExists = Config::has(static::EXPOSE_CONFIG_KEY);
         $transformIsDefined = $keyExists && key_exists($modelName, Config::get(static::EXPOSE_CONFIG_KEY));
 
+        // return plain array if no transformer is defined
         if (!$keyExists || !$transformIsDefined) {
             return $content->toArray();
         }
@@ -135,7 +138,6 @@ class RequestHandler
         $transformer = $transformerList[$modelName];
 
         $transformerClass = new $transformer;
-
         $modelData = $content->all();
         foreach ($modelData as $key => $model) {
             $modelData[$key] = $transformerClass->transform($model);
@@ -166,11 +168,12 @@ class RequestHandler
     }
 
     /**
+     * Return the base-url from the Request
      * @param Request $request
      * @return string
      */
     private function getBaseUrl(Request $request): string
     {
-       return $request->getSchemeAndHttpHost();
+        return $request->getSchemeAndHttpHost();
     }
 }

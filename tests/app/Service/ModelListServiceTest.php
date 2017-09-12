@@ -1,28 +1,26 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: adrian-tilita
- * Date: 9/12/17
- * Time: 3:04 PM
- */
-
 namespace AdrianTilita\ResourceExposer\Service;
-
 
 use AdrianTilita\ResourceExposer\Base\CacheInterface;
 use NeedleProject\Common\ClassFinder;
+use PHPUnit\Framework\TestCase;
 
-class ModelListServiceTest extends \PHPUnit_Framework_TestCase
+class ModelListServiceTest extends TestCase
 {
+    /**
+     * Test search method
+     */
     public function testSearch()
     {
+        // build mock
         $classFinderMock = $this->getMockBuilder(ClassFinder::class)
             ->disableOriginalConstructor()
             ->getMock();
         $classFinderMock->expects($this->once())
             ->method('findClasses')
             ->willReturn([
-                'Foo\\Bar'
+                'Foo\\Bar',
+                'Bar\\Foo'
             ]);
 
         $cacheMock = $this->getMockBuilder(CacheInterface::class)
@@ -31,6 +29,13 @@ class ModelListServiceTest extends \PHPUnit_Framework_TestCase
 
         $cacheMock->expects($this->once())
             ->method('store')
+            ->with(
+                $this->equalTo(ModelListService::STORE_KEY),
+                $this->equalTo([
+                    'bar' => 'Foo\\Bar',
+                    'foo' => 'Bar\\Foo'
+                ])
+            )
             ->willReturn(null);
 
         $service = new ModelListService(
@@ -41,8 +46,12 @@ class ModelListServiceTest extends \PHPUnit_Framework_TestCase
         $service->search();
     }
 
+    /**
+     * Test fetchAll method
+     */
     public function testFetchAll()
     {
+        // build mocks
         $classFinderMock = $this->getMockBuilder(ClassFinder::class)
             ->disableOriginalConstructor()
             ->getMock();
@@ -54,19 +63,23 @@ class ModelListServiceTest extends \PHPUnit_Framework_TestCase
         $cacheMock->expects($this->once())
             ->method('get')
             ->willReturn([
-                'Foo\\Bar' => 'bar'
+                'bar' => 'Foo\\Bar'
             ]);
 
         $cacheMock->expects($this->once())
             ->method('has')
             ->willReturn(true);
 
+        // build service
         $service = new ModelListService(
             $classFinderMock,
             $cacheMock
         );
 
         $list = $service->fetchAll();
-        var_dump($list);
+        $this->assertEquals(
+            ['bar' => 'Foo\\Bar'],
+            $list
+        );
     }
 }

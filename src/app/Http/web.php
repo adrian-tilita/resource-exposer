@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 | and give it the Closure to execute when that URI is requested.
 |
 */
-Route::options('exposure/info', function() {
+Route::options('exposure/info', function () {
     return new JsonResponse([
         'routes' => [
             'index' => [
@@ -71,14 +71,14 @@ Route::options('exposure/info', function() {
 });
 
 
-Route::get('exposure/list', function(RequestHandler $requestHandler, Request $request) {
+Route::get('exposure/list', function (RequestHandler $requestHandler, Request $request) {
     list($response, $statusCode) = $requestHandler->handleList($request);
     return new JsonResponse($response, $statusCode);
 });
 
 Route::get(
     'exposure/filter/{resourceName}/{filterKey}/{filterValue}{extraFields?}',
-    function(RequestHandler $requestHandler, $resourceName, $filterKey, $filterValue, $extraFields = '') {
+    function (RequestHandler $requestHandler, $resourceName, $filterKey, $filterValue, $extraFields = '') {
         $page_nr  = 1;
         $per_page = 100;
 

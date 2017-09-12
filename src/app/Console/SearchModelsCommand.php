@@ -47,8 +47,8 @@ class SearchModelsCommand extends Command
     public function handle()
     {
 
-        $io = new SymfonyStyle($this->input, $this->output);
-        $io->note(
+        $symfonyStyleOutput = new SymfonyStyle($this->input, $this->output);
+        $symfonyStyleOutput->note(
             sprintf(
                 "Default search path for models will be <%s>.\n" .
                 " To run search on different path view help information",
@@ -64,7 +64,7 @@ class SearchModelsCommand extends Command
         $this->getModelListService()->search();
         $modelList = $this->getModelListService()->fetchAll();
 
-        $io->success(
+        $symfonyStyleOutput->success(
             sprintf(
                 "Finished parsing for models in project!\nFound %d models in your project.\n\n%s",
                 count($modelList),
@@ -72,8 +72,6 @@ class SearchModelsCommand extends Command
             ),
             "info"
         );
-        var_dump('a');
-        die();
         return null;
     }
 

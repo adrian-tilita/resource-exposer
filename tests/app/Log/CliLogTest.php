@@ -2,8 +2,9 @@
 namespace AdrianTilita\ResourceExposer\Log;
 
 use Symfony\Component\Console\Output\OutputInterface;
+use PHPUnit\Framework\TestCase;
 
-class CliLogTest extends \PHPUnit_Framework_TestCase
+class CliLogTest extends TestCase
 {
     /**
      * Dummy test the log usage
