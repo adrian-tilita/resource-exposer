@@ -1,6 +1,7 @@
 <?php
 use AdrianTilita\ResourceExposer\Service\RequestHandler;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -70,8 +71,8 @@ Route::options('exposure/info', function() {
 });
 
 
-Route::get('exposure/list', function(RequestHandler $requestHandler) {
-    list($response, $statusCode) = $requestHandler->handleList();
+Route::get('exposure/list', function(RequestHandler $requestHandler, Request $request) {
+    list($response, $statusCode) = $requestHandler->handleList($request);
     return new JsonResponse($response, $statusCode);
 });
 

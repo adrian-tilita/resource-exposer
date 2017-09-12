@@ -5,6 +5,7 @@ use AdrianTilita\ResourceExposer\Console\GenerateCommand;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Config;
 
@@ -31,13 +32,18 @@ class RequestHandler
     }
 
     /**
+     * @param Request $request
      * @return array
      */
-    public function handleList()
+    public function handleList(Request $request)
     {
         try {
             $response = array_keys(
                 $this->modelListService->fetchAll()
+            );
+            $response = $this->adaptList(
+                $response,
+                $this->getBaseUrl($request)
             );
         } catch (\Throwable $e) {
             $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR;
@@ -135,5 +141,36 @@ class RequestHandler
             $modelData[$key] = $transformerClass->transform($model);
         }
         return $modelData;
+    }
+
+    /**
+     * @param array $list
+     * @param string $baseUrl
+     * @return array
+     */
+    private function adaptList(array $list, string $baseUrl)
+    {
+        foreach ($list as $key => $resourceName) {
+            $list[$key] = [
+                'resource_name' => $resourceName,
+                'available_routes' => [
+                    Request::METHOD_GET => [
+                        sprintf("%s/exposure/filter/%s/id/[int]", $baseUrl, $resourceName),
+                        sprintf("%s/exposure/filter/%s/[field_name]/[field_value]", $baseUrl, $resourceName),
+                        sprintf("%s/exposure/filter/%s/id/[int]", $baseUrl, $resourceName)
+                    ]
+                ]
+            ];
+        }
+        return $list;
+    }
+
+    /**
+     * @param Request $request
+     * @return string
+     */
+    private function getBaseUrl(Request $request): string
+    {
+       return $request->getSchemeAndHttpHost();
     }
 }
