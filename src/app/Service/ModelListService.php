@@ -1,7 +1,6 @@
 <?php
 namespace AdrianTilita\ResourceExposer\Service;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use NeedleProject\Common\ClassFinder;
 
