@@ -40,7 +40,7 @@ return [
 ```
 3. For the first setup, run in CLI:
 ```
-php artisan expose:setup
+php artisan exposer:search-models
 ```
 
 4. Access OPTION ```[base-url]exposure/info``` for information

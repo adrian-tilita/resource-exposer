@@ -1,0 +1,41 @@
+checks:
+    php:
+        fix_php_opening_tag: false
+        remove_php_closing_tag: false
+        no_mixed_inline_html: false
+        require_braces_around_control_structures: false
+        psr2_control_structure_declaration: false
+        avoid_superglobals: false
+        security_vulnerabilities: true
+        no_exit: false
+        simplify_boolean_return: true
+        return_doc_comments: true
+        return_doc_comment_if_not_inferrable: true
+        properties_in_camelcaps: true
+        remove_extra_empty_lines: true
+        phpunit_assertions: true
+        parameters_in_camelcaps: true
+        parameter_doc_comments: true
+
+filter: {  }
+coding_style:
+    php: true
+build:
+    environment:
+        php:
+            version: 7.1.0
+    tests:
+        override:
+            -
+                command: 'php vendor/bin/phpunit --coverage-clover=coverage-report'
+                coverage:
+                    file: 'coverage-report'
+                    format: 'clover'
+    nodes:
+        tests: true
+        analysis:
+            tests:
+                override:
+                    -
+                        command: phpcs-run
+                        use_website_config: true
