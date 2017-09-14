@@ -6,10 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\URL;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\HttpFoundation\Response;
 
 class RequestHandlerTest extends TestCase
 {
+    /**
+     * Reset mockery instances
+     */
+    public function tearDown()
+    {
+        \Mockery::close();
+    }
+
     /**
      * Test list resources
      */
@@ -70,15 +77,7 @@ class RequestHandlerTest extends TestCase
         $requestHandler = new RequestHandler($modelListService);
         $list = $requestHandler->listResources();
 
-        $this->assertEquals(
-            [
-                // content
-                ['error' => 'Temporary unavailable!'],
-                // status code
-                500
-            ],
-            $list
-        );
+        $this->assertEquals([['error' => 'Temporary unavailable!'], 500], $list);
     }
 
     /**
@@ -86,7 +85,7 @@ class RequestHandlerTest extends TestCase
      */
     public function testGetResource()
     {
-
+        // build mocks
         $baseModelMock = $this->getMockBuilder(Model::class)
             ->disableOriginalConstructor()
             ->getMock();
@@ -120,12 +119,54 @@ class RequestHandlerTest extends TestCase
         $requestHandler = new RequestHandler($modelListService);
         $response = $requestHandler->getResource('foo', 1);
 
-        $this->assertEquals(
-            [
-                ['foo' => 'bar'],
-                200
-            ],
-            $response
-        );
+        $this->assertEquals([['foo' => 'bar'], 200], $response);
+    }
+
+    /**
+     * Test get single resource
+     */
+    public function testNotFoundGetResource()
+    {
+        // build mocks
+        \Mockery::mock('overload:\FooModel')
+            ->shouldReceive('find')
+            ->once()
+            ->with(1)
+            ->andReturn(null);
+
+        $modelListService = $this->getMockBuilder(ModelListService::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $modelListService->expects($this->once())
+            ->method('fetchAll')
+            ->will($this->returnValue([
+                'foo' => \FooModel::class
+            ]));
+
+        $requestHandler = new RequestHandler($modelListService);
+        $response = $requestHandler->getResource('foo', 1);
+
+        $this->assertEquals([['error' => 'Resource foo identified by 1 could not be found!'], 404], $response);
+    }
+
+
+    /**
+     * Test get single resource
+     */
+    public function testInvalidGetResource()
+    {
+        $modelListService = $this->getMockBuilder(ModelListService::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $modelListService->expects($this->once())
+            ->method('fetchAll')
+            ->will($this->returnValue([]));
+
+        $requestHandler = new RequestHandler($modelListService);
+        $response = $requestHandler->getResource('foo', 1);
+
+        $this->assertEquals([['error' => 'Resource foo does not exists!'], 404], $response);
     }
 }

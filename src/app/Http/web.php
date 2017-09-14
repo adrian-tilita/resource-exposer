@@ -2,7 +2,6 @@
 use AdrianTilita\ResourceExposer\Service\RequestHandler;
 use AdrianTilita\ResourceExposer\Provider\ApplicationServiceProvider;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Illuminate\Support\Facades\Route;
@@ -21,7 +20,7 @@ use Illuminate\Support\Facades\Route;
  * Index route
  */
 Route::get('/exposure', function () {
-    return new RedirectResponse(URL::to('/') . '/exposure/list', Response::HTTP_MOVED_PERMANENTLY);
+    return new RedirectResponse(URL::to('/') . '/exposure/list', JsonResponse::HTTP_MOVED_PERMANENTLY);
 })->name(ApplicationServiceProvider::APPLICATION_IDENTIFIER);
 
 /**
@@ -31,7 +30,7 @@ Route::any('/exposure/list', function (Request $request, RequestHandler $request
     if ($request->getMethod() !== Request::METHOD_GET) {
         return new JsonResponse(
             "Method not allowed!",
-            Response::HTTP_METHOD_NOT_ALLOWED
+            JsonResponse::HTTP_METHOD_NOT_ALLOWED
         );
     }
 
