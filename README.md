@@ -1,3 +1,8 @@
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/adrian-tilita/resource-exposer/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/adrian-tilita/resource-exposer/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/adrian-tilita/resource-exposer/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/adrian-tilita/resource-exposer/?branch=master)
+[![Build Status](https://scrutinizer-ci.com/g/adrian-tilita/resource-exposer/badges/build.png?b=master)](https://scrutinizer-ci.com/g/adrian-tilita/resource-exposer/build-status/master)
+
+
 # Resource exposure
 An automatic Laravel resource (model) API expose system.
 
@@ -43,14 +48,20 @@ return [
 php artisan exposer:search-models
 ```
 
-4. Access OPTION ```[base-url]exposure/info``` for information
+4. Configuration
 
-5. (Optional) - Register Transformers
-Create a new file in ```config``` directory named ```expose.php```
-Open ```config/expose.php``` and add:
+By default the library uses defaults for BasicAuth and has no transformers.
+Default BasicAuth credentials: ```foo:bar```
+
+If you wish to extend the configuration, create a new file ```exposer.php``` inside your laravel's config directory.
+Example configuration:
 ```
 <?php
 return [
+    'authorization' => [
+        'username' => 'foo',
+        'password' => 'bar'
+    ],
     'transformers' => [
         MyNameSpace\\MyModel::class => MyNameSpace\\MyTransformer::class
     ]

@@ -1,7 +1,10 @@
 <?php
 use AdrianTilita\ResourceExposer\Service\RequestHandler;
+use AdrianTilita\ResourceExposer\Provider\ApplicationServiceProvider;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,11 +21,8 @@ use Illuminate\Support\Facades\Route;
  * Index route
  */
 Route::get('/exposure', function () {
-    return new \Symfony\Component\HttpFoundation\RedirectResponse(
-        URL::to('/') . '/exposure/list',
-        \Symfony\Component\HttpFoundation\Response::HTTP_MOVED_PERMANENTLY
-    );
-})->name(\AdrianTilita\ResourceExposer\Provider\ApplicationServiceProvider::APPLICATION_IDENTIFIER);
+    return new RedirectResponse(URL::to('/') . '/exposure/list', Response::HTTP_MOVED_PERMANENTLY);
+})->name(ApplicationServiceProvider::APPLICATION_IDENTIFIER);
 
 /**
  * Handle /exposure/list route for any
@@ -31,13 +31,13 @@ Route::any('/exposure/list', function (Request $request, RequestHandler $request
     if ($request->getMethod() !== Request::METHOD_GET) {
         return new JsonResponse(
             "Method not allowed!",
-            \Symfony\Component\HttpFoundation\Response::HTTP_METHOD_NOT_ALLOWED
+            Response::HTTP_METHOD_NOT_ALLOWED
         );
     }
 
     list($response, $statusCode) = $requestHandler->listResources();
     return new JsonResponse($response, $statusCode);
-})->name(\AdrianTilita\ResourceExposer\Provider\ApplicationServiceProvider::APPLICATION_IDENTIFIER);
+})->name(ApplicationServiceProvider::APPLICATION_IDENTIFIER);
 
 /**
  * Individual resource
@@ -47,7 +47,7 @@ Route::get('exposure/{resourceName}/{id}', function (RequestHandler $requestHand
     list($response, $statusCode) = $requestHandler->getResource($resourceName, $id);
     return new JsonResponse($response, $statusCode);
 
-})->name(\AdrianTilita\ResourceExposer\Provider\ApplicationServiceProvider::APPLICATION_IDENTIFIER);//->where('resourceName', '([A-Za-z0-9_-]+)')
+})->name(ApplicationServiceProvider::APPLICATION_IDENTIFIER);//->where('resourceName', '([A-Za-z0-9_-]+)')
    // ->where('id', '(0-9]+)');
 
 /**
@@ -70,5 +70,5 @@ Route::get('exposure/{resourceName}', function (RequestHandler $requestHandler, 
 
     return new JsonResponse($response, $statusCode);
 
-})->name(\AdrianTilita\ResourceExposer\Provider\ApplicationServiceProvider::APPLICATION_IDENTIFIER)
+})->name(ApplicationServiceProvider::APPLICATION_IDENTIFIER)
     ->where('resourceName', '([A-Za-z0-9_-]+)');

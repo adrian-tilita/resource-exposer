@@ -128,9 +128,7 @@ class RequestHandler
             }
 
             /** @var Model $model */
-            $model = $resources[$resourceName];
-            $model = $model::find($id);
-
+            $model = (new $resources[$resourceName])->find($id);
             if (is_null($model)) {
                 return [
                     ['error' => sprintf('Resource %s identified by %d could not be found!', $resourceName, $id)],
