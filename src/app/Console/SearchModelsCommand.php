@@ -35,7 +35,7 @@ class SearchModelsCommand extends Command
     private $modelListService = null;
 
     /**
-     * @var null|ClassSearchService
+     * @var null|ClassFinder
      */
     private $classSearchService = null;
 
@@ -69,8 +69,7 @@ class SearchModelsCommand extends Command
                 "Finished parsing for models in project!\nFound %d models in your project.\n\n%s",
                 count($modelList),
                 implode(", ", $modelList)
-            ),
-            "info"
+            )
         );
         return null;
     }
