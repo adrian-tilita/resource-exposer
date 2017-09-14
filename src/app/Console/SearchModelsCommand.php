@@ -35,7 +35,7 @@ class SearchModelsCommand extends Command
     private $modelListService = null;
 
     /**
-     * @var null|ClassSearchService
+     * @var null|ClassFinder
      */
     private $classSearchService = null;
 

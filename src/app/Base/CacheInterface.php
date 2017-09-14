@@ -11,6 +11,7 @@ interface CacheInterface
      * Store data in cache
      * @param string $key
      * @param array $data
+     * @return void
      */
     public function store(string $key, array $data);
 

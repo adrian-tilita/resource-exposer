@@ -56,3 +56,7 @@ return [
     ]
 ];
 ```
+
+# Future-releases/Roadmap
+- add basic auth for exposed resources
+- add configuration for authentication method and credentials

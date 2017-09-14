@@ -1,7 +1,6 @@
 <?php
 namespace AdrianTilita\ResourceExposer\Service;
 
-use AdrianTilita\ResourceExposer\Console\GenerateCommand;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -18,7 +17,7 @@ class RequestHandler
     const FILTER_TYPE_DATE = 'newer_than';
 
     /**
-     * @var null|GenerateCommand
+     * @var null|ModelListService
      */
     private $modelListService;
 
