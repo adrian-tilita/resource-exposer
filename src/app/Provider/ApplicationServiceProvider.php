@@ -2,8 +2,10 @@
 namespace AdrianTilita\ResourceExposer\Provider;
 
 use AdrianTilita\ResourceExposer\Console\SearchModelsCommand;
+use AdrianTilita\ResourceExposer\Middleware\RouteMiddleware;
 use AdrianTilita\ResourceExposer\Service\ModelListService;
 use AdrianTilita\ResourceExposer\Service\RequestHandler;
+use Illuminate\Routing\Events\RouteMatched;
 use NeedleProject\Common\ClassFinder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\ServiceProvider;
@@ -14,6 +16,11 @@ use Illuminate\Support\ServiceProvider;
  */
 class ApplicationServiceProvider extends ServiceProvider
 {
+    /**
+     * @const string    Default application identifier - used for route names
+     */
+    const APPLICATION_IDENTIFIER = 'exposure';
+
     /**
      * Register routes, translations, views and publishers.
      *
@@ -30,17 +37,24 @@ class ApplicationServiceProvider extends ServiceProvider
         ]);
 
         // model list service
-        $this->app->bind('AdrianTilita\ResourceExposer\Service\ModelListService', function () {
+        $this->app->bind(ModelListService::class, function () {
             return new ModelListService(
                 new ClassFinder(app_path(), Model::class)
             );
         });
-        $this->app->make('AdrianTilita\ResourceExposer\Service\ModelListService');
+        $this->app->make(ModelListService::class);
 
         // request handler
-        $this->app->bind('AdrianTilita\ResourceExposer\Service\RequestHandler', function ($app) {
-            return new RequestHandler($app->make('AdrianTilita\ResourceExposer\Service\ModelListService'));
+        $this->app->bind(RequestHandler::class, function ($app) {
+            return new RequestHandler($app->make(ModelListService::class));
         });
-        $this->app->make('AdrianTilita\ResourceExposer\Service\RequestHandler');
+        $this->app->make(RequestHandler::class);
+
+        // register route middle-ware so we can validate authentication
+        $app['router']->matched(function (RouteMatched $routeMatched) {
+            if ($routeMatched->route->getName() === static::APPLICATION_IDENTIFIER) {
+                $routeMatched->route->middleware(['before' => RouteMiddleware::class]);
+            }
+        });
     }
 }

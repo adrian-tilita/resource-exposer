@@ -1,30 +1,27 @@
 <?php
 namespace AdrianTilita\ResourceExposer\Service;
 
-use AdrianTilita\ResourceExposer\Console\GenerateCommand;
+use AdrianTilita\ResourceExposer\Bridge\ConfigBridge;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\URL;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Config;
 
+/**
+ * Class RequestHandler
+ * @package AdrianTilita\ResourceExposer\Service
+ */
 class RequestHandler
 {
     /**
      * @const string
      */
-    const EXPOSE_CONFIG_KEY = 'expose';
     const DEFAULT_EXCEPTION_MESSAGE = 'Temporary unavailable!';
-
     const ORDER_DESC = 'desc';
-    /*
-    const FILTER_TYPE_DATE = 'newer_than';*/
 
     /**
-     * @var null|GenerateCommand
+     * @var null|ModelListService
      */
     private $modelListService;
 
@@ -161,15 +158,12 @@ class RequestHandler
      */
     private function adaptContent(Collection $content, string $modelName): array
     {
-        $keyExists = Config::has(static::EXPOSE_CONFIG_KEY);
-        $transformIsDefined = $keyExists && key_exists($modelName, Config::get(static::EXPOSE_CONFIG_KEY));
+        $transformerList = ConfigBridge::getInstance()->get(ConfigBridge::CONFIG_KEY_TRANSFORMERS);
 
         // return plain array if no transformer is defined
-        if (!$keyExists || !$transformIsDefined) {
+        if (false === key_exists($modelName, $transformerList)) {
             return $content->toArray();
         }
-
-        $transformerList = Config::get(static::EXPOSE_CONFIG_KEY);
         $transformer = $transformerList[$modelName];
 
         $transformerClass = new $transformer;
