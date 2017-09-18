@@ -17,11 +17,11 @@ class RouteMiddleware
     public function handle(Request $request, \Closure $next)
     {
         if ($request->headers->has('authorization')) {
-            $authorizationCredentials = ConfigBridge::getInstance()
+            $authCredentials = ConfigBridge::getInstance()
                 ->get(ConfigBridge::CONFIG_KEY_AUTHORIZATION);
 
-            if ($authorizationCredentials['username'] !== $request->getUser() &&
-                $authorizationCredentials['password'] !== $request->getPassword()) {
+            if ($authCredentials['username'] !== $request->getUser() &&
+                $authCredentials['password'] !== $request->getPassword()) {
                 return new JsonResponse(
                     "Authentication failed!",
                     Response::HTTP_UNAUTHORIZED

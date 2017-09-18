@@ -42,10 +42,8 @@ Route::any('/exposure/list', function (Request $request, RequestHandler $request
  * Individual resource
  */
 Route::get('exposure/{resourceName}/{id}', function (RequestHandler $requestHandler, string $resourceName, int $id) {
-
     list($response, $statusCode) = $requestHandler->getResource($resourceName, $id);
     return new JsonResponse($response, $statusCode);
-
 })->name(ApplicationServiceProvider::APPLICATION_IDENTIFIER);//->where('resourceName', '([A-Za-z0-9_-]+)')
    // ->where('id', '(0-9]+)');
 
@@ -68,6 +66,5 @@ Route::get('exposure/{resourceName}', function (RequestHandler $requestHandler, 
     );
 
     return new JsonResponse($response, $statusCode);
-
 })->name(ApplicationServiceProvider::APPLICATION_IDENTIFIER)
     ->where('resourceName', '([A-Za-z0-9_-]+)');

@@ -112,10 +112,10 @@ class RequestHandler
     /**
      * Get individual Resource
      * @param string $resourceName
-     * @param int $id
+     * @param int $resourceId
      * @return array
      */
-    public function getResource(string $resourceName, int $id): array
+    public function getResource(string $resourceName, int $resourceId): array
     {
         try {
             $resources = $this->modelListService->fetchAll();
@@ -128,10 +128,16 @@ class RequestHandler
             }
 
             /** @var Model $model */
-            $model = (new $resources[$resourceName])->find($id);
+            $model = (new $resources[$resourceName])->find($resourceId);
             if (is_null($model)) {
                 return [
-                    ['error' => sprintf('Resource %s identified by %d could not be found!', $resourceName, $id)],
+                    [
+                        'error' => sprintf(
+                            'Resource %s identified by %d could not be found!',
+                            $resourceName,
+                            $resourceId
+                        )
+                    ],
                     Response::HTTP_NOT_FOUND
                 ];
             }
