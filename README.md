@@ -12,7 +12,7 @@ An automatic Laravel resource (model) API expose system.
 {
     "require": {
         [..]
-        "adrian-tilita/resource-exposer": "dev-develop"
+        "adrian-tilita/resource-exposer": ">0.1.0 <2.0.0"
         [..]
     },
     "repositories": [
