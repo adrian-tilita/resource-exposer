@@ -5,7 +5,7 @@ use AdrianTilita\ResourceExposer\Provider\ApplicationServiceProvider;
 use Illuminate\Support\Facades\Config;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
-class ConfigBridge
+final class ConfigBridge
 {
     /**
      * @cons string Available usable config keys
