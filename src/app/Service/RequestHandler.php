@@ -1,20 +1,23 @@
 <?php
 namespace AdrianTilita\ResourceExposer\Service;
 
-use Carbon\Carbon;
+use AdrianTilita\ResourceExposer\Bridge\ConfigBridge;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
-use Symfony\Component\HttpFoundation\Request;
+use Illuminate\Support\Facades\URL;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Config;
 
+/**
+ * Class RequestHandler
+ * @package AdrianTilita\ResourceExposer\Service
+ */
 class RequestHandler
 {
     /**
      * @const string
      */
-    const EXPOSE_CONFIG_KEY = 'expose';
-    const FILTER_TYPE_DATE = 'newer_than';
+    const DEFAULT_EXCEPTION_MESSAGE = 'Temporary unavailable!';
+    const ORDER_DESC = 'desc';
 
     /**
      * @var null|ModelListService
@@ -31,22 +34,19 @@ class RequestHandler
     }
 
     /**
-     * @param Request $request
+     * List all application defined resource
      * @return array
      */
-    public function handleList(Request $request)
+    public function listResources()
     {
         try {
             $response = array_keys(
                 $this->modelListService->fetchAll()
             );
-            $response = $this->adaptList(
-                $response,
-                $this->getBaseUrl($request)
-            );
+            $response = $this->adaptList($response);
         } catch (\Throwable $e) {
             $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR;
-            $response = ['error' => $e->getMessage()];
+            $response = ['error' => static::DEFAULT_EXCEPTION_MESSAGE];
         }
 
         return [
@@ -56,60 +56,96 @@ class RequestHandler
     }
 
     /**
-     * Handle filters
      *
      * @param string $resourceName
-     * @param string $filterKey
-     * @param string $filterValue
-     * @param int $pageNr
-     * @param int $perPage
      * @return array
      */
-    public function handleFilter(
+    /**
+     * Get resource collection
+     * @param string $resourceName
+     * @param int $limit
+     * @param int $offset
+     * @param string $sortBy
+     * @param string $order
+     * @return array
+     */
+    public function getResourceCollection(
         string $resourceName,
-        string $filterKey,
-        string $filterValue,
-        int $pageNr,
-        int $perPage
-    ) {
+        int $limit,
+        int $offset,
+        string $sortBy,
+        string $order
+    ): array {
         try {
             $resources = $this->modelListService->fetchAll();
             // invalid resource name
             if (!isset($resources[$resourceName])) {
                 return [
                     ['error' => sprintf('Resource %s does not exists!', $resourceName)],
-                    Response::HTTP_BAD_REQUEST
+                    Response::HTTP_NOT_FOUND
                 ];
             }
 
             /** @var Model $model */
             $model = $resources[$resourceName];
-            switch ($filterKey) {
-                case static::FILTER_TYPE_DATE:
-                    $query = $model::where('created_at', '>=', Carbon::createFromTimestamp($filterValue))
-                        ->orWhere('updated_at', '>=', Carbon::createFromTimestamp($filterValue));
-                    break;
-                default:
-                    $query = $model::where($filterKey, $filterValue);
+            $collection = $model::all();
+            if ($order === static::ORDER_DESC) {
+                $collection = $collection->sortByDesc($sortBy);
+            } else {
+                $collection = $collection->sortBy($sortBy);
             }
-            $totalItems = $query->count();
+            $collection = $collection->slice($offset, $limit);
 
-            $content = $query->limit($perPage)
-                ->skip(($pageNr * $perPage) - $perPage)
-                ->get();
-
-            $content = $this->adaptContent($content, $resources[$resourceName]);
-
-            $response = [
-                'content' => $content,
-                'total' => $totalItems,
-                'current_page' => $pageNr,
-                'per_page' => $perPage,
-                'page_count' => ceil($totalItems / $perPage)
-            ];
+            $response = $this->adaptContent($collection, $resources[$resourceName]);
         } catch (\Throwable $e) {
             $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR;
-            $response = ['error' => $e->getMessage()];
+            $response = ['error' => $e->getMessage() . static::DEFAULT_EXCEPTION_MESSAGE];
+        }
+
+        return [
+            $response,
+            !isset($statusCode) ? Response::HTTP_OK : $statusCode
+        ];
+    }
+
+    /**
+     * Get individual Resource
+     * @param string $resourceName
+     * @param int $resourceId
+     * @return array
+     */
+    public function getResource(string $resourceName, int $resourceId): array
+    {
+        try {
+            $resources = $this->modelListService->fetchAll();
+            // invalid resource name
+            if (!isset($resources[$resourceName])) {
+                return [
+                    ['error' => sprintf('Resource %s does not exists!', $resourceName)],
+                    Response::HTTP_NOT_FOUND
+                ];
+            }
+
+            /** @var Model $model */
+            $model = (new $resources[$resourceName])->find($resourceId);
+            if (is_null($model)) {
+                return [
+                    [
+                        'error' => sprintf(
+                            'Resource %s identified by %d could not be found!',
+                            $resourceName,
+                            $resourceId
+                        )
+                    ],
+                    Response::HTTP_NOT_FOUND
+                ];
+            }
+
+            $response = $this->adaptContent(Collection::make([$model]), $resources[$resourceName]);
+            $response = array_pop($response);
+        } catch (\Throwable $e) {
+            $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR;
+            $response = ['error' => $e->getMessage() . static::DEFAULT_EXCEPTION_MESSAGE];
         }
 
         return [
@@ -125,18 +161,16 @@ class RequestHandler
      */
     private function adaptContent(Collection $content, string $modelName): array
     {
-        $keyExists = Config::has(static::EXPOSE_CONFIG_KEY);
-        $transformIsDefined = $keyExists && key_exists($modelName, Config::get(static::EXPOSE_CONFIG_KEY));
+        $transformerList = ConfigBridge::getInstance()->get(ConfigBridge::CONFIG_KEY_TRANSFORMERS);
 
         // return plain array if no transformer is defined
-        if (!$keyExists || !$transformIsDefined) {
+        if (false === key_exists($modelName, $transformerList)) {
             return $content->toArray();
         }
-
-        $transformerList = Config::get(static::EXPOSE_CONFIG_KEY);
         $transformer = $transformerList[$modelName];
 
         $transformerClass = new $transformer;
+
         $modelData = $content->all();
         foreach ($modelData as $key => $model) {
             $modelData[$key] = $transformerClass->transform($model);
@@ -145,34 +179,19 @@ class RequestHandler
     }
 
     /**
+     * Adapt content for resource listing
      * @param array $list
-     * @param string $baseUrl
      * @return array
      */
-    private function adaptList(array $list, string $baseUrl)
+    private function adaptList(array $list)
     {
+        $baseUrl = URL::to('/');
         foreach ($list as $key => $resourceName) {
             $list[$key] = [
                 'resource_name' => $resourceName,
-                'available_routes' => [
-                    Request::METHOD_GET => [
-                        sprintf("%s/exposure/filter/%s/id/[int]", $baseUrl, $resourceName),
-                        sprintf("%s/exposure/filter/%s/[field_name]/[field_value]", $baseUrl, $resourceName),
-                        sprintf("%s/exposure/filter/%s/id/[int]", $baseUrl, $resourceName)
-                    ]
-                ]
+                'url' => sprintf("%s/exposure/%s", $baseUrl, $resourceName)
             ];
         }
         return $list;
-    }
-
-    /**
-     * Return the base-url from the Request
-     * @param Request $request
-     * @return string
-     */
-    private function getBaseUrl(Request $request): string
-    {
-        return $request->getSchemeAndHttpHost();
     }
 }
