@@ -2,8 +2,8 @@
 use AdrianTilita\ResourceExposer\Service\RequestHandler;
 use AdrianTilita\ResourceExposer\Provider\ApplicationServiceProvider;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request as HttpRequest;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -26,8 +26,8 @@ Route::get('/exposure', function () {
 /**
  * Handle /exposure/list route for any
  */
-Route::any('/exposure/list', function (Request $request, RequestHandler $requestHandler) {
-    if ($request->getMethod() !== Request::METHOD_GET) {
+Route::any('/exposure/list', function (HttpRequest $request, RequestHandler $requestHandler) {
+    if ($request->getMethod() !== HttpRequest::METHOD_GET) {
         return new JsonResponse(
             "Method not allowed!",
             JsonResponse::HTTP_METHOD_NOT_ALLOWED
@@ -51,7 +51,7 @@ Route::get('exposure/{resourceName}/{id}', function (RequestHandler $requestHand
 /**
  * Collection list
  */
-Route::get('exposure/{resourceName}', function (RequestHandler $requestHandler, Request $request, $resourceName) {
+Route::get('exposure/{resourceName}', function (RequestHandler $requestHandler, HttpRequest $request, $resourceName) {
 
     $limit  = $request->request->get('limit', 100);
     $offset = $request->request->get('offset', 0);
