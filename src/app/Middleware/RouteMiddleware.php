@@ -19,15 +19,15 @@ class RouteMiddleware
         if ($request->headers->has('authorization')) {
             $authCredentials = ConfigBridge::getInstance()
                 ->get(ConfigBridge::CONFIG_KEY_AUTHORIZATION);
-
-            if ($authCredentials['username'] !== $request->getUser() &&
-                $authCredentials['password'] !== $request->getPassword()) {
-                return new JsonResponse(
-                    "Authentication failed!",
-                    Response::HTTP_UNAUTHORIZED
-                );
+            if ($authCredentials['username'] === $request->getUser() &&
+                $authCredentials['password'] === $request->getPassword()) {
+                // jump to next closure if is authorized
+                return $next($request);
             }
         }
-        return $next($request);
+        return new JsonResponse(
+            ['error' => 'Authentication failed!'],
+            Response::HTTP_UNAUTHORIZED
+        );
     }
 }

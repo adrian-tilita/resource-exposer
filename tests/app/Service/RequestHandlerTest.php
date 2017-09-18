@@ -95,7 +95,7 @@ class RequestHandlerTest extends TestCase
                 'foo' => 'bar'
             ]);
 
-        \Mockery::mock('overload:\FooModel')
+        \Mockery::mock('overload:\Foo\FooModel')
             ->shouldReceive('find')
             ->once()
             ->with(1)
@@ -113,7 +113,7 @@ class RequestHandlerTest extends TestCase
         $modelListService->expects($this->once())
             ->method('fetchAll')
             ->will($this->returnValue([
-                'foo' => \FooModel::class
+                'foo' => \Foo\FooModel::class
             ]));
 
         $requestHandler = new RequestHandler($modelListService);
@@ -128,7 +128,7 @@ class RequestHandlerTest extends TestCase
     public function testNotFoundGetResource()
     {
         // build mocks
-        \Mockery::mock('overload:\FooModel')
+        \Mockery::mock('overload:\Foo\FooModel')
             ->shouldReceive('find')
             ->once()
             ->with(1)
@@ -141,7 +141,7 @@ class RequestHandlerTest extends TestCase
         $modelListService->expects($this->once())
             ->method('fetchAll')
             ->will($this->returnValue([
-                'foo' => \FooModel::class
+                'foo' => \Foo\FooModel::class
             ]));
 
         $requestHandler = new RequestHandler($modelListService);
