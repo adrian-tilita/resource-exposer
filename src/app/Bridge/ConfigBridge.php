@@ -28,10 +28,10 @@ final class ConfigBridge
      */
     public static function getInstance(): ConfigBridge
     {
-        if (is_null(static::$instance)) {
-            static::$instance = new self();
+        if (is_null(self::$instance)) {
+            self::$instance = new self();
         }
-        return static::$instance;
+        return self::$instance;
     }
 
     /**
