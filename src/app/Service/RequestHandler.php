@@ -2,7 +2,6 @@
 namespace AdrianTilita\ResourceExposer\Service;
 
 use AdrianTilita\ResourceExposer\Bridge\ConfigBridge;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\URL;

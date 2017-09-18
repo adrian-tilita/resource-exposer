@@ -24,8 +24,8 @@ class ModelListService
 
     /**
      * ModelListService constructor.
-     * @param ClassFinder $classFinder
-     * @param CacheInterface $cache
+     * @param ClassFinder           $classFinder
+     * @param null|CacheInterface   $cache
      */
     public function __construct(ClassFinder $classFinder, CacheInterface $cache = null)
     {
